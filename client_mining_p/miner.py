@@ -14,9 +14,9 @@ def proof_of_work(block):
     in an effort to find a number that is a valid proof
     :return: A valid proof for the provided block
     """
-    block_string = json.dumps(block)
+    block_string = json.dumps(block, sort_keys=True)
     proof = 0
-    while self.valid_proof(block_string, proof) is False:
+    while valid_proof(block_string, proof) is False:
         proof+=1
     return proof
 
@@ -64,7 +64,7 @@ if __name__ == '__main__':
             print("Error:  Non-json response")
             print("Response returned:")
             print(r)
-            continue
+            break
 
         # TODO: Get the block from `data` and use it to look for a new proof
         # new_proof = ???
@@ -81,19 +81,19 @@ if __name__ == '__main__':
         # add 1 to the number of coins mined and print it.  Otherwise,
         # print the message from the server.
         try:
-            more_data = r.json()
-            if more_data['message'] == 'New Block Forged':
-                end_time = time.time()
-                coins += 1
-                print(f"took {end_time - start_time} amound of time")
-                print(f"you have {coins} coins")
-            else:
-                end_time = time.time()
-                print(f"took {end_time - start_time} amound of time")
-                print(f{more_data['message']})
-        except:
-            except ValueError:
+            data = r.json()
+        except ValueError:
             print("Error:  Non-json response")
             print("Response returned:")
             print(r)
-            continue
+            break
+        
+        if data['message'] == 'New Block Forged':
+            end_time = time.time()
+            coins += 1
+            print(f"took {end_time - start_time} amound of time")
+            print(f"you have {coins} coins")
+        else:
+            end_time = time.time()
+            print(f"took {end_time - start_time} amound of time")
+            print(f"{data['message']}")

@@ -109,24 +109,28 @@ blockchain = Blockchain()
 def mine():
     data = request.get_json()
     # Run the proof of work algorithm to get the next proof
-    if 'proof' in data and 'id' in data:
-        proof = data['proof']
-        successful_proof = blockchain.valid_proof(blockchain.last_block, proof)
-        if successful_proof:
-            # Forge the new Block by adding it to the chain with the proof
-            previous_hash = hashlib.hash(blockchain.last_block)
-            new_block = blockchain.new_block(proof, previous_hash)
-            response {
-                "block": new_block,
-                "message": "New Block Forged"
-            }
-            status = 200
+    if not data['proof'] and not data['id']:
+        response = {
+            "message":"proof and id are missing!"
+        }
+        return jsonify(response), 400
+
+    proof = data['proof']
+    successful_proof = blockchain.valid_proof(json.dumps(blockchain.last_block, sort_keys=True), proof)
+    if successful_proof:
+        # Forge the new Block by adding it to the chain with the proof
+        previous_hash = blockchain.hash(blockchain.last_block)
+        new_block = blockchain.new_block(proof, previous_hash)
+        response = {
+            "message": "New Block Forged"
+        }
+        return jsonify(response), 200
     else:
         response = {
-            "message": "proof and id are missing!"
+            "message": "check your proof again!"
         }
-        status = 400
-    return jsonify(response), status
+        return jsonify(response), 400
+    
 
 @app.route('/chain', methods=['GET'])
 def full_chain():
@@ -143,7 +147,7 @@ def full_chain():
 def last_block():
     response = {
         # TODO: Return the chain and its current length
-        "lastblock": blockchain.last_block
+        "last_block": blockchain.last_block
     }
     return jsonify(response), 200
 
