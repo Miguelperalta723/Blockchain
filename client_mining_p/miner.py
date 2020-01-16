@@ -1,5 +1,6 @@
 import hashlib
 import requests
+import time
 
 import sys
 import json
@@ -52,8 +53,10 @@ if __name__ == '__main__':
     f.close()
 
     # Run forever until interrupted
+    coins = 0
     while True:
         r = requests.get(url=node + "/last_block")
+        start_time = time.time()
         # Handle non-json response
         try:
             data = r.json()
@@ -61,18 +64,36 @@ if __name__ == '__main__':
             print("Error:  Non-json response")
             print("Response returned:")
             print(r)
-            break
+            continue
 
         # TODO: Get the block from `data` and use it to look for a new proof
         # new_proof = ???
+        
+        new_proof = proof_of_work(data['last_block'])
+            
 
         # When found, POST it to the server {"proof": new_proof, "id": id}
         post_data = {"proof": new_proof, "id": id}
 
         r = requests.post(url=node + "/mine", json=post_data)
-        data = r.json()
-
+       
         # TODO: If the server responds with a 'message' 'New Block Forged'
         # add 1 to the number of coins mined and print it.  Otherwise,
         # print the message from the server.
-        pass
+        try:
+            more_data = r.json()
+            if more_data['message'] == 'New Block Forged':
+                end_time = time.time()
+                coins += 1
+                print(f"took {end_time - start_time} amound of time")
+                print(f"you have {coins} coins")
+            else:
+                end_time = time.time()
+                print(f"took {end_time - start_time} amound of time")
+                print(f{more_data['message']})
+        except:
+            except ValueError:
+            print("Error:  Non-json response")
+            print("Response returned:")
+            print(r)
+            continue
